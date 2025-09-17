@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Birthday Surprise</title>
+    <style>
+        :root {
+            --pink: #ff4da6;
+            --purple: #8a4dff;
+            --blue: #4db8ff;
+            --yellow: #ffd54d;
+            --bg: radial-gradient(circle at 30% 20%, #ffe1ff 0%, #e6f3ff 40%, #fff6e6 100%);
+            --text: #3a2a4a;
+        }
+
+        html, body {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            color: var(--text);
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+        }
+
+        .cta {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.1rem;
+            opacity: 0.85;
+            text-align: center;
+        }
+
+        /* Gift Box */
+        .gift-stage {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            transition: opacity 600ms ease, transform 600ms ease;
+        }
+        .gift-wrapper {
+            position: relative;
+            width: min(60vmin, 360px);
+            height: min(60vmin, 360px);
+            cursor: pointer;
+            user-select: none;
+        }
+        .box {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70%;
+            background:
+                repeating-linear-gradient(90deg, var(--pink) 0 16px, #fff 16px 28px, var(--purple) 28px 44px, #fff 44px 56px);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .ribbon-vert {
+            position: absolute;
+            top: -8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12%;
+            height: 116%;
+            background: linear-gradient(var(--yellow), #ffc107);
+            border-radius: 8px;
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6);
+        }
+        .lid {
+            position: absolute;
+            bottom: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;
+            height: 22%;
+            background: linear-gradient(180deg, var(--blue), #2fa9ff);
+            border-radius: 14px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            transform-origin: bottom left;
+        }
+        .bow {
+            position: absolute;
+            bottom: calc(70% + 15%);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 20%;
+        }
+        .bow::before,
+        .bow::after {
+            content: "";
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, #fff8 0 30%, transparent 31%), linear-gradient(var(--pink), #e60073);
+            border-radius: 50% 50% 10% 10% / 60% 60% 10% 10%;
+        }
+        .bow::before { left: 0; transform: rotate(-15deg); }
+        .bow::after { right: 0; transform: rotate(15deg); }
+
+        .hint { margin-top: 12px; font-weight: 600; }
+
+        .shake { animation: shake 600ms ease both; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px) rotate(-1deg); }
+            40% { transform: translateX(8px) rotate(1deg); }
+            60% { transform: translateX(-6px) rotate(-1deg); }
+            80% { transform: translateX(6px) rotate(1deg); }
+        }
+        .open .lid { animation: lidOpen 900ms 100ms cubic-bezier(.2,.8,.2,1) forwards; }
+        .open .bow { animation: bowPop 900ms 100ms cubic-bezier(.2,.8,.2,1) forwards; }
+        @keyframes lidOpen {
+            0% { transform: translateX(-50%) rotate(0); }
+            40% { transform: translateX(-50%) rotate(-12deg); }
+            100% { transform: translateX(-120%) rotate(-60deg); opacity: 0; }
+        }
+        @keyframes bowPop {
+            0% { transform: translateX(-50%) scale(1); }
+            100% { transform: translateX(-180%) rotate(-30deg) scale(0.4); opacity: 0; }
+        }
+
+        /* Cake Stage */
+        .cake-stage {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 600ms ease;
+        }
+        .cake-stage.visible { opacity: 1; pointer-events: auto; }
+
+        .cake-wrapper {
+            position: relative;
+            width: min(80vmin, 520px);
+            height: min(70vmin, 460px);
+            display: grid;
+            place-items: center;
+        }
+        .cake-drop { animation: cakeDrop 900ms cubic-bezier(.2,.9,.2,1) both; }
+        @keyframes cakeDrop {
+            0% { transform: translateY(-120vh) scale(0.9); opacity: 0; }
+            60% { transform: translateY(12px) scale(1.02); opacity: 1; }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .cake {
+            position: relative;
+            width: 70%;
+            max-width: 420px;
+            aspect-ratio: 1 / 0.6;
+        }
+        .cake-base {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 66%;
+            background: linear-gradient(180deg, #ffe6f2, #ffd1e8 35%, #ffb3d1);
+            border-radius: 24px 24px 28px 28px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .frosting {
+            position: absolute;
+            top: -16px;
+            left: 0;
+            width: 100%;
+            height: 42%;
+            background:
+                radial-gradient(ellipse at 10% 10%, #fff 0 60%, transparent 61%) 0 0/20% 80% repeat-x,
+                linear-gradient(180deg, #fff 0%, #ffe6f7 100%);
+        }
+        .sprinkles {
+            position: absolute;
+            top: 8%; left: 0; width: 100%; height: 20%;
+            background:
+                radial-gradient(circle, var(--purple) 0 2px, transparent 3px) 10% 30%/28px 22px repeat,
+                radial-gradient(circle, var(--blue) 0 2px, transparent 3px) 40% 60%/30px 26px repeat,
+                radial-gradient(circle, var(--yellow) 0 2px, transparent 3px) 70% 50%/24px 28px repeat,
+                radial-gradient(circle, var(--pink) 0 2px, transparent 3px) 20% 80%/32px 30px repeat;
+            opacity: 0.9;
+        }
+
+        /* Candles */
+        .candles { position: absolute; top: 6%; left: 10%; right: 10%; height: 36%; }
+        .candle {
+            position: absolute;
+            bottom: 0;
+            width: 16px; height: 80px;
+            border-radius: 8px;
+            background: repeating-linear-gradient(135deg, #fff 0 10px, #cdf 10px 20px);
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05);
+            transform-origin: bottom center;
+            cursor: pointer;
+        }
+        .candle .wick {
+            position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+            width: 3px; height: 12px; background: #333; border-radius: 2px;
+        }
+        .flame {
+            position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+            width: 18px; height: 26px;
+            background: radial-gradient(circle at 50% 60%, #fff 0 20%, #ffd54d 21% 60%, #ff6f61 61% 100%);
+            border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+            filter: drop-shadow(0 0 12px rgba(255, 167, 38, 0.9));
+            animation: flicker 120ms infinite alternate;
+            transform-origin: bottom center;
+        }
+        @keyframes flicker {
+            from { transform: translateX(-50%) scale(1) rotate(-2deg); opacity: 0.9; }
+            to { transform: translateX(-50%) scale(1.1) rotate(2deg); opacity: 1; }
+        }
+        .puff {
+            position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+            width: 8px; height: 8px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,200,255,0.9), rgba(200,200,255,0.1));
+            animation: puff 350ms ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes puff {
+            from { opacity: 0.9; transform: translateX(-50%) translateY(0) scale(1); }
+            to { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(5); }
+        }
+        .out .flame { display: none; }
+
+        /* Microphone CTA */
+        .mic-controls {
+            position: absolute;
+            top: 16px; left: 16px; right: 16px;
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer;
+            background: linear-gradient(90deg, var(--purple), var(--pink)); color: white; font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+        }
+        .btn.secondary { background: linear-gradient(90deg, #4db8ff, #2fa9ff); }
+        .btn:disabled { filter: grayscale(0.3); opacity: 0.7; cursor: not-allowed; }
+
+        /* Slicing */
+        .slices { position: absolute; bottom: 0; left: 0; width: 100%; height: 66%; pointer-events: none; }
+        .slice { position: absolute; bottom: 0; width: 20%; height: 100%; background: transparent; }
+        .slice::before {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(180deg, #ffe6f2, #ffd1e8 35%, #ffb3d1);
+            border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .slice-anim .slice:nth-child(odd) { animation: slideLeft 1200ms cubic-bezier(.2,.9,.2,1) forwards; }
+        .slice-anim .slice:nth-child(even) { animation: slideRight 1200ms cubic-bezier(.2,.9,.2,1) forwards; }
+        @keyframes slideLeft { to { transform: translateX(-40%) rotate(-2deg); } }
+        @keyframes slideRight { to { transform: translateX(40%) rotate(2deg); } }
+
+        /* Final image stage */
+        .end-stage {
+            position: absolute; inset: 0; display: grid; place-items: center;
+            background: radial-gradient(circle at 50% 40%, #fff 0%, #ffe6f7 40%, #f0e7ff 100%);
+            opacity: 0; pointer-events: none; transition: opacity 800ms ease;
+        }
+        .end-stage.visible { opacity: 1; pointer-events: auto; }
+        .final-card { text-align: center; padding: 24px; }
+        .final-svg { width: min(92vw, 1000px); height: auto; display: block; }
+        .final-sub { margin-top: 12px; font-size: 1.1rem; opacity: 0.85; }
+
+        /* Accessibility helpers */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+        /* Responsive tweaks */
+        @media (max-width: 520px) {
+            .candle { height: 64px; }
+            .btn { padding: 10px 14px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Landing / Gift -->
+        <section class="gift-stage" id="giftStage" aria-label="Gift surprise">
+            <div class="gift-wrapper" id="giftWrapper" role="button" aria-label="Open the gift" tabindex="0">
+                <div class="lid"></div>
+                <div class="box"></div>
+                <div class="ribbon-vert"></div>
+                <div class="bow"></div>
+            </div>
+            <div class="cta">
+                <div class="hint">What could be inside?</div>
+                <small>(Tap or press Enter on the gift)</small>
+            </div>
+        </section>
+
+        <!-- Cake and candles -->
+        <section class="cake-stage" id="cakeStage" aria-live="polite">
+            <div class="mic-controls">
+                <button class="btn" id="enableMicBtn" aria-pressed="false">Enable Microphone to Blow</button>
+                <button class="btn secondary" id="blowAllBtn">Blow Out All Candles</button>
+            </div>
+            <div class="cake-wrapper">
+                <div class="cake cake-drop" id="cake">
+                    <div class="cake-base">
+                        <div class="frosting"></div>
+                        <div class="sprinkles"></div>
+                        <div class="slices" id="slices"></div>
+                    </div>
+                    <div class="candles" id="candles"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Image / Card -->
+        <section class="end-stage" id="endStage" aria-label="Birthday card">
+            <div class="final-card">
+                <svg class="final-svg" viewBox="0 0 1400 500" role="img" aria-label="Happy Birthday, my lovely little sister!">
+                    <defs>
+                        <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#ff4da6"/>
+                            <stop offset="50%" stop-color="#8a4dff"/>
+                            <stop offset="100%" stop-color="#4db8ff"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="6" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect x="0" y="0" width="1400" height="500" fill="transparent"/>
+                    <text x="50%" y="45%" text-anchor="middle" font-size="120" font-weight="900" fill="url(#grad)" filter="url(#glow)" font-family="'Segoe UI', Roboto, Arial, sans-serif">Happy Birthday</text>
+                    <text x="50%" y="75%" text-anchor="middle" font-size="80" font-weight="800" fill="url(#grad)" filter="url(#glow)" font-family="'Segoe UI', Roboto, Arial, sans-serif">my lovely little sister!</text>
+                </svg>
+                <div class="final-sub">Wishing you a day as wonderful as you are 💖</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Utilities
+        const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+        // Elements
+        const giftStage = document.getElementById('giftStage');
+        const giftWrapper = document.getElementById('giftWrapper');
+        const cakeStage = document.getElementById('cakeStage');
+        const candlesEl = document.getElementById('candles');
+        const slicesEl = document.getElementById('slices');
+        const endStage = document.getElementById('endStage');
+        const enableMicBtn = document.getElementById('enableMicBtn');
+        const blowAllBtn = document.getElementById('blowAllBtn');
+
+        // State
+        const NUM_CANDLES = 7;
+        let candleStates = Array(NUM_CANDLES).fill(true); // true = lit
+        let audioCtx = null;
+        let mediaStream = null;
+        let analyser = null;
+        let micActive = false;
+
+        // Gift interactions
+        function triggerGiftOpen() {
+            if (giftWrapper.classList.contains('open')) return;
+            giftWrapper.classList.add('shake');
+            setTimeout(async () => {
+                giftWrapper.classList.remove('shake');
+                giftWrapper.classList.add('open');
+                await wait(900);
+                giftStage.style.opacity = '0';
+                giftStage.style.transform = 'scale(0.98)';
+                await wait(600);
+                giftStage.style.display = 'none';
+                showCakeStage();
+            }, 620);
+        }
+
+        giftWrapper.addEventListener('click', triggerGiftOpen);
+        giftWrapper.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerGiftOpen(); }
+        });
+
+        // Build candles
+        function layoutCandles() {
+            candlesEl.innerHTML = '';
+            const areaWidth = candlesEl.clientWidth || 300;
+            const step = areaWidth / (NUM_CANDLES + 1);
+            for (let i = 0; i < NUM_CANDLES; i++) {
+                const c = document.createElement('div');
+                c.className = 'candle';
+                c.style.left = `${(i+1) * step - 8}px`;
+                c.dataset.index = String(i);
+                const wick = document.createElement('div'); wick.className = 'wick';
+                const flame = document.createElement('div'); flame.className = 'flame'; flame.setAttribute('aria-hidden', 'true');
+                c.appendChild(wick); c.appendChild(flame);
+                c.addEventListener('click', () => puffOut(i, c));
+                candlesEl.appendChild(c);
+            }
+        }
+
+        function buildSlices() {
+            slicesEl.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = `${i*20}%`;
+                slicesEl.appendChild(s);
+            }
+        }
+
+        async function showCakeStage() {
+            cakeStage.classList.add('visible');
+            layoutCandles();
+            buildSlices();
+        }
+
+        function puffOut(index, candleEl) {
+            if (!candleStates[index]) return;
+            candleStates[index] = false;
+            candleEl.classList.add('out');
+            const puff = document.createElement('div'); puff.className = 'puff';
+            candleEl.appendChild(puff);
+            setTimeout(() => puff.remove(), 500);
+            checkAllOut();
+        }
+
+        function blowOutAll() {
+            document.querySelectorAll('.candle').forEach((candleEl) => {
+                const idx = Number(candleEl.dataset.index);
+                if (candleStates[idx]) puffOut(idx, candleEl);
+            });
+        }
+
+        function checkAllOut() {
+            if (candleStates.every(v => !v)) {
+                onAllCandlesOut();
+            }
+        }
+
+        // Microphone blow detection
+        async function enableMic() {
+            if (micActive) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+                const source = audioCtx.createMediaStreamSource(mediaStream);
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+                micActive = true;
+                enableMicBtn.disabled = true;
+                enableMicBtn.textContent = 'Microphone Enabled';
+                listenForBlow();
+            } catch (e) {
+                console.error(e);
+                enableMicBtn.textContent = 'Microphone Blocked';
+            }
+        }
+
+        function listenForBlow() {
+            if (!analyser) return;
+            const buffer = new Uint8Array(analyser.fftSize);
+            let hotFrames = 0;
+            const threshold = 70; // approximately loud breath level
+            const requiredFrames = 6; // consecutive frames
+
+            const loop = () => {
+                analyser.getByteTimeDomainData(buffer);
+                // Compute peak-to-peak amplitude
+                let min = 255, max = 0;
+                for (let i = 0; i < buffer.length; i++) {
+                    const v = buffer[i];
+                    if (v < min) min = v;
+                    if (v > max) max = v;
+                }
+                const amp = max - min; // 0..255
+                if (amp > threshold) {
+                    hotFrames++;
+                    if (hotFrames >= requiredFrames) {
+                        blowOutAll();
+                        return; // stop listening after success
+                    }
+                } else {
+                    hotFrames = Math.max(0, hotFrames - 1);
+                }
+                requestAnimationFrame(loop);
+            };
+            requestAnimationFrame(loop);
+        }
+
+        enableMicBtn.addEventListener('click', enableMic);
+        blowAllBtn.addEventListener('click', blowOutAll);
+
+        // On all candles out -> slice + music -> fade to video
+        async function onAllCandlesOut() {
+            // Start slicing
+            slicesEl.classList.add('slice-anim');
+            // Start music
+            try { playHappyBirthday(); } catch (e) { console.warn('Audio not started:', e); }
+            // After a short while, fade to video
+            await wait(4500);
+            cakeStage.classList.remove('visible');
+            await wait(400);
+            endStage.classList.add('visible');
+        }
+
+        // Simple Web Audio synth for "Happy Birthday"
+        function playHappyBirthday() {
+            const ctx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) audioCtx = ctx;
+            const tempo = 108; // bpm
+            const beat = 60 / tempo; // seconds per beat
+            const now = ctx.currentTime + 0.05;
+
+            const melody = [
+                // Note (Hz or null for rest), length in beats
+                ['G4', 1], ['G4', 1], ['A4', 2], ['G4', 2], ['C5', 2], ['B4', 4],
+                ['G4', 1], ['G4', 1], ['A4', 2], ['G4', 2], ['D5', 2], ['C5', 4],
+                ['G4', 1], ['G4', 1], ['G5', 2], ['E5', 2], ['C5', 2], ['B4', 2], ['A4', 3],
+                ['F5', 1], ['F5', 1], ['E5', 2], ['C5', 2], ['D5', 2], ['C5', 4]
+            ];
+            let t = 0;
+            for (const [note, len] of melody) {
+                if (note) scheduleNote(ctx, noteToFreq(note), now + t, len * beat);
+                t += len * beat;
+            }
+        }
+
+        function noteToFreq(n) {
+            const map = { C:0, 'C#':1, Db:1, D:2, 'D#':3, Eb:3, E:4, F:5, 'F#':6, Gb:6, G:7, 'G#':8, Ab:8, A:9, 'A#':10, Bb:10, B:11 };
+            const m = n.match(/^([A-G](?:#|b)?)(\d)$/);
+            if (!m) return 440;
+            const [, nn, oStr] = m; const o = parseInt(oStr, 10);
+            const semis = (o - 4) * 12 + (map[nn] - 9);
+            return 440 * Math.pow(2, semis / 12);
+        }
+
+        function scheduleNote(ctx, freq, start, dur) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const now = ctx.currentTime;
+            const s = Math.max(start, now);
+            const e = s + dur;
+            gain.gain.setValueAtTime(0.0001, s);
+            gain.gain.exponentialRampToValueAtTime(0.15, s + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.10, s + dur * 0.6);
+            gain.gain.exponentialRampToValueAtTime(0.0001, e);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(s);
+            osc.stop(e + 0.01);
+        }
+
+        // Initialize
+        window.addEventListener('resize', () => {
+            layoutCandles();
+        });
+        // Prebuild slices for initial layout (hidden until cake stage)
+        buildSlices();
+    </script>
+</body>
+</html>
+
+
